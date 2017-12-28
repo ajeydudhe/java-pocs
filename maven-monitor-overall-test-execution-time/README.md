@@ -4,4 +4,4 @@ We are using the [GMavenPlus Plugin](http://groovy.github.io/GMavenPlus/) to cap
 * During the __test__ phase capture the current time.
 * Now, get the time difference and if the difference is more than the expected time then throw an exception to cause a build break.
 
-Refer the __gmavenplus-plugin__ section in [pom.xml](/pom.xml).
+Refer the __gmavenplus-plugin__ section in [pom.xml](pom.xml).
