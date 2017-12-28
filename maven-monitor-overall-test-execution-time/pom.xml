@@ -47,8 +47,6 @@
   							<script>
   								<![CDATA[
   									project.properties['testExecutionStartTimestamp'] = java.time.Instant.now()
-
-  									log.info('Starting test execution at: ' + new Date(project.properties['testExecutionStartTimestamp'].toEpochMilli()))
   								]]>
   							</script>
   						</scripts>
@@ -69,25 +67,30 @@
   									
   									Instant startTime = project.properties['testExecutionStartTimestamp']
   									Instant endTime = Instant.now()
-  									
-  									log.info(String.format('Test execution start time: [%s]', new Date(startTime.toEpochMilli())))
-  									log.info(String.format('Test execution end time: [%s]', new Date(endTime.toEpochMilli())))
-  									
-  									Duration timeElapsed = Duration.between(startTime, endTime);
-  									log.info('Test execution duration: ' + timeElapsed)
-  									
+
   									Duration overallTestsTimeoutInSeconds = Duration.ofSeconds(Integer.parseInt('${overall.tests.execution.timeout.in.seconds}'))
-  									log.info('Overall tests execution timeout = ' + overallTestsTimeoutInSeconds)
+  									Duration timeElapsed = Duration.between(startTime, endTime);
   									
-  									if(timeElapsed.compareTo(overallTestsTimeoutInSeconds) > 0) {
-  										newLine = System.getProperty("line.separator")
-  										message = String.format('%s%s*** Test execution time (%s) was more than expected time (%s), hence failing the build.%s' + 
-  																'*** Optimize the time consuming tests or increase the expected timeout.',
-  										                        newLine, newLine,
-  										                        timeElapsed, overallTestsTimeoutInSeconds, 
-  										                        newLine)
-  										throw new IllegalStateException(message)
-  									}
+  									if(timeElapsed.compareTo(overallTestsTimeoutInSeconds) <= 0)
+  									   return;
+  									
+  									newLine = System.getProperty("line.separator")
+  									
+  									String message = new StringBuilder()
+			  										   .append(newLine).append(newLine)
+			  									       .append(String.format('Test execution time (%s) was more than expected time (%s), hence failing the build.', timeElapsed, overallTestsTimeoutInSeconds))
+			  									       .append(newLine)
+			  									       .append('Optimize the time consuming tests or increase the expected timeout.')
+			  									       .append(newLine).append(newLine)
+			  									       .append(String.format('Test execution start time: [%s]', new Date(startTime.toEpochMilli())))
+			  									       .append(newLine)
+			  									       .append(String.format('Test execution end time: [%s]', new Date(endTime.toEpochMilli())))
+			  									       .append(newLine)
+			  									       .append('Test execution duration: ' + timeElapsed)
+			  									       .append(newLine)
+			  										   .append('Overall tests execution timeout: ' + overallTestsTimeoutInSeconds)
+  									
+  									throw new IllegalStateException(message)
   								]]>
   							</script>
   						</scripts>
