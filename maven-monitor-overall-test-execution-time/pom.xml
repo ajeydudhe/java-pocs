@@ -1,0 +1,108 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>my.pocs</groupId>
+  <artifactId>maven-monitor-overall-test-execution-time</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+
+  <properties>
+  	<overall.tests.execution.timeout.in.seconds>10</overall.tests.execution.timeout.in.seconds>
+
+	<!-- Dependency versions -->
+  	<junit.version>4.12</junit.version>
+  	<hamcrest-core.version>1.3</hamcrest-core.version>
+  	<gmavenplus-plugin.version>1.6</gmavenplus-plugin.version>
+  	<groovy.version>2.4.13</groovy.version>
+  </properties>
+  
+  <dependencies>
+	<dependency>
+	    <groupId>junit</groupId>
+	    <artifactId>junit</artifactId>
+	    <version>${junit.version}</version>
+	    <scope>test</scope>
+	</dependency>
+	<dependency>
+	    <groupId>org.hamcrest</groupId>
+	    <artifactId>hamcrest-core</artifactId>
+	    <version>${hamcrest-core.version}</version>
+	    <scope>test</scope>
+	</dependency>
+  </dependencies>
+
+  <build>
+  	<plugins>
+  		<plugin>
+  			<groupId>org.codehaus.gmavenplus</groupId>
+  			<artifactId>gmavenplus-plugin</artifactId>
+  			<version>${gmavenplus-plugin.version}</version>
+  			<executions>
+  				<execution>
+  					<id>before-test-execution</id>
+  					<phase>test-compile</phase>
+  					<goals>
+  						<goal>execute</goal>
+  					</goals>
+  					<configuration>
+  						<scripts>
+  							<script>
+  								<![CDATA[
+  									project.properties['testExecutionStartTimestamp'] = java.time.Instant.now()
+
+  									log.info('Starting test execution at: ' + new Date(project.properties['testExecutionStartTimestamp'].toEpochMilli()))
+  								]]>
+  							</script>
+  						</scripts>
+  					</configuration>
+  				</execution>
+  				<execution>
+  					<id>after-test-execution</id>
+  					<phase>test</phase>
+  					<goals>
+  						<goal>execute</goal>
+  					</goals>
+  					<configuration>
+  						<scripts>
+  							<script>
+  								<![CDATA[
+  									import java.time.Duration
+  									import java.time.Instant
+  									
+  									Instant startTime = project.properties['testExecutionStartTimestamp']
+  									Instant endTime = Instant.now()
+  									
+  									log.info(String.format('Test execution start time: [%s]', new Date(startTime.toEpochMilli())))
+  									log.info(String.format('Test execution end time: [%s]', new Date(endTime.toEpochMilli())))
+  									
+  									Duration timeElapsed = Duration.between(startTime, endTime);
+  									log.info('Test execution duration: ' + timeElapsed)
+  									
+  									Duration overallTestsTimeoutInSeconds = Duration.ofSeconds(Integer.parseInt('${overall.tests.execution.timeout.in.seconds}'))
+  									log.info('Overall tests execution timeout = ' + overallTestsTimeoutInSeconds)
+  									
+  									if(timeElapsed.compareTo(overallTestsTimeoutInSeconds) > 0) {
+  										newLine = System.getProperty("line.separator")
+  										message = String.format('%s%s*** Test execution time (%s) was more than expected time (%s), hence failing the build.%s' + 
+  																'*** Optimize the time consuming tests or increase the expected timeout.',
+  										                        newLine, newLine,
+  										                        timeElapsed, overallTestsTimeoutInSeconds, 
+  										                        newLine)
+  										throw new IllegalStateException(message)
+  									}
+  								]]>
+  							</script>
+  						</scripts>
+  					</configuration>
+  				</execution>
+  			</executions>
+  			<dependencies>
+			    <dependency>
+			      <groupId>org.codehaus.groovy</groupId>
+			      <artifactId>groovy-all</artifactId>
+			      <version>${groovy.version}</version>
+			      <scope>runtime</scope>
+			    </dependency>	
+  			</dependencies>
+  		</plugin>
+  	</plugins>
+  </build>  
+</project>
