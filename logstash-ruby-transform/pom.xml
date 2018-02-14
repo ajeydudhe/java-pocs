@@ -6,4 +6,111 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>logstash-ruby-transform</artifactId>
+  
+  <properties>
+    <logstash.version>6.2.1</logstash.version>
+    <logstash-core-plugin-api.version>2.1.28</logstash-core-plugin-api.version>
+    <logstash-dir>${basedir}/logstash-${logstash.version}</logstash-dir>
+    <ruby-gems-dir>${logstash-dir}/vendor/bundle/jruby/2.3.0</ruby-gems-dir>    
+  </properties>
+  
+  <profiles>
+    <profile>
+        <id>Download logstash</id>
+        <activation>
+            <file>
+                <missing>logstash-${logstash.version}</missing>
+            </file>
+        </activation>
+		<build>
+			<plugins>
+				<plugin>
+				    <groupId>com.googlecode.maven-download-plugin</groupId>
+				    <artifactId>download-maven-plugin</artifactId>
+				    <version>${maven-download-plugin.version}</version>
+				    <executions>
+				        <execution>
+				            <id>Download logstash</id>
+				            <phase>validate</phase>
+				            <goals>
+				                <goal>wget</goal>
+				            </goals>
+				            <configuration>
+				                <skip>false</skip>				                
+				                <url>https://artifacts.elastic.co/downloads/logstash/logstash-${logstash.version}.tar.gz</url>
+				                <sha512>ae7972e8aabbd351a86430de17f53e74ebc6620e3e251af06224b0813016988b508b4dfb7aca9d30b45660f05732c83eb2d09357ac3976859102d3348bd47ec2</sha512>
+				                <unpack>true</unpack>
+				                <outputDirectory>${basedir}</outputDirectory>
+				            </configuration>
+				        </execution>
+				    </executions>
+				</plugin>
+				<plugin>
+				    <groupId>org.codehaus.mojo</groupId>
+				    <artifactId>exec-maven-plugin</artifactId>
+				    <version>${exec-maven-plugin.version}</version>                
+				    <executions>
+				      <execution>
+				        <id>Download Gem: logstash-core-plugin-api</id>  
+				        <phase>validate</phase>
+				        <goals>
+				          <goal>exec</goal>
+				        </goals>
+				        <configuration>
+				          <skip>false</skip>
+				          <!-- TODO: Handle for non-Windows OS -->
+				          <executable>${logstash-dir}/vendor/jruby/bin/jruby.exe</executable>
+				          <arguments>
+				            <argument>-S</argument>
+				            <argument>gem</argument>
+				            <argument>install</argument>
+				            <argument>logstash-core-plugin-api</argument>
+				            <argument>-v</argument>
+				            <argument>${logstash-core-plugin-api.version}</argument>
+				          </arguments>
+				          <environmentVariables>
+				            <GEM_HOME>${ruby-gems-dir}</GEM_HOME>
+				          </environmentVariables>
+				        </configuration>
+				      </execution>
+				    </executions>
+				</plugin>
+			</plugins>
+		</build>
+    </profile>
+  </profiles>  
+  
+  <build>
+    <plugins>
+       <plugin>
+           <groupId>org.codehaus.mojo</groupId>
+           <artifactId>exec-maven-plugin</artifactId>
+           <version>${exec-maven-plugin.version}</version>                
+           <executions>
+             <execution>
+               <id>Execute ES Data Transform Tests</id>  
+               <phase>process-resources</phase>
+               <goals>
+                 <goal>exec</goal>
+               </goals>
+               <configuration>
+                 <skip>false</skip>
+                 <executable>java</executable>
+                 <arguments>
+                   <!-- <argument>-Dlog4j.configurationFile=file:./src/test/resources/es-migration_log4j2.properties</argument> -->
+                   <argument>-cp</argument>
+                   <!-- TODO: Need to use the logstash-core from the gem location. Remove version dependency. If we don't use this version of logstash-core then get error -->
+                   <argument>${ruby-gems-dir}/gems/logstash-core-5.6.4-java/lib/logstash-core/logstash-core.jar;${logstash-dir}/logstash-core/lib/jars/*</argument>
+                   <argument>org.jruby.Main</argument>
+                   <argument>${basedir}/src/test/ruby/core/es_transform_tests.rb</argument>
+                   </arguments>
+                 <environmentVariables>
+                   <GEM_HOME>${ruby-gems-dir}</GEM_HOME>
+                 </environmentVariables>
+               </configuration>
+             </execution>
+           </executions>
+       </plugin>
+    </plugins>    
+  </build>    
 </project>
