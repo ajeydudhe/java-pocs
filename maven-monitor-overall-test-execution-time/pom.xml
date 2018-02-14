@@ -1,34 +1,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>my.pocs</groupId>
+  <parent>
+    <groupId>my.pocs</groupId>
+    <artifactId>main</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
   <artifactId>maven-monitor-overall-test-execution-time</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
 
   <properties>
   	<overall.tests.execution.timeout.in.seconds>10</overall.tests.execution.timeout.in.seconds>
 
 	<!-- Dependency versions -->
-  	<junit.version>4.12</junit.version>
-  	<hamcrest-core.version>1.3</hamcrest-core.version>
   	<gmavenplus-plugin.version>1.6</gmavenplus-plugin.version>
   	<groovy.version>2.4.13</groovy.version>
   </properties>
   
-  <dependencies>
-	<dependency>
-	    <groupId>junit</groupId>
-	    <artifactId>junit</artifactId>
-	    <version>${junit.version}</version>
-	    <scope>test</scope>
-	</dependency>
-	<dependency>
-	    <groupId>org.hamcrest</groupId>
-	    <artifactId>hamcrest-core</artifactId>
-	    <version>${hamcrest-core.version}</version>
-	    <scope>test</scope>
-	</dependency>
-  </dependencies>
-
   <build>
   	<plugins>
   		<plugin>
