@@ -12,10 +12,27 @@
     <logstash-core-plugin-api.version>2.1.28</logstash-core-plugin-api.version>
     <logstash-dir>${basedir}/logstash-${logstash.version}</logstash-dir>
     <ruby-gems-dir>${logstash-dir}/vendor/bundle/jruby/2.3.0</ruby-gems-dir>
-    <local-jars-dir>${basedir}/local_jars</local-jars-dir>    
+    <local-jars-dir>${basedir}/local_jars</local-jars-dir>
+    <ruby-executable>jruby</ruby-executable>    
   </properties>
   
+  <dependencies>
+	<dependency>
+	    <groupId>commons-io</groupId>
+	    <artifactId>commons-io</artifactId>
+	    <version>${commons-io.version}</version>
+	</dependency>
+  </dependencies>
+  
   <profiles>
+    <profile>
+        <activation>
+            <os><family>Windows</family></os>
+        </activation>
+        <properties>
+            <ruby-executable>jruby.exe</ruby-executable>
+        </properties>
+    </profile>
     <profile>
         <id>Download logstash</id>
         <activation>
@@ -60,7 +77,7 @@
 				        <configuration>
 				          <skip>false</skip>
 				          <!-- TODO: Handle for non-Windows OS -->
-				          <executable>${logstash-dir}/vendor/jruby/bin/jruby.exe</executable>
+				          <executable>${logstash-dir}/vendor/jruby/bin/${ruby-executable}</executable>
 				          <arguments>
 				            <argument>-S</argument>
 				            <argument>gem</argument>

@@ -208,9 +208,9 @@ class EsSetEventTypeFilter
 	def filter(event)
 		value = event.get('[@metadata][_index]')
 
-		if value.start_with?('users_')
+		if value.start_with?('users-')
 			event.set('[type]', 'user')	
-		elsif value.start_with?('files_')
+		elsif value.start_with?('files-')
 			event.set('[type]', 'file')	
 		else
 			event.set('[type]', 'event')	
