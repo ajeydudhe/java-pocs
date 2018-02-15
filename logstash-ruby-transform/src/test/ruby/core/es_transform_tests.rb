@@ -1,4 +1,4 @@
-require_relative "../dummy_tests"
+require_relative "../event_type_tests"
 
 module EsTransform
   

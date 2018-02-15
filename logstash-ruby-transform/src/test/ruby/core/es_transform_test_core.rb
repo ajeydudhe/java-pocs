@@ -5,15 +5,15 @@ require "logstash/instrument/namespaced_null_metric"
 require "logstash/event"
 require "insist"
 
-#require_relative "../../../pack/etc/atp_transform"
+require_relative "../../../main/ruby/es_transform"
 
 module EsTransform
   class EsTransformScriptFilter
     def self.register_filter()
-      #register({})
+      register({})
     end
     def self.execute_filter(event)
-      #return filter(event)[0]
+      return filter(event)[0]
     end
   end  
   

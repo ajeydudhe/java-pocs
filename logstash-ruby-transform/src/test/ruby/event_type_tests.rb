@@ -8,7 +8,11 @@ module EsTransform
       end
       
       def test_does_nothing()
-        puts 'Test executed !!!'
+        raw_event = get_base_event()
+        
+        transformed_event = transform(raw_event)
+
+        insist {transformed_event.get('type')} == 'abc'
       end
                   
     end

@@ -9,10 +9,6 @@
 
   <properties>
   	<overall.tests.execution.timeout.in.seconds>10</overall.tests.execution.timeout.in.seconds>
-
-	<!-- Dependency versions -->
-  	<gmavenplus-plugin.version>1.6</gmavenplus-plugin.version>
-  	<groovy.version>2.4.13</groovy.version>
   </properties>
   
   <build>

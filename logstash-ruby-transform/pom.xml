@@ -11,7 +11,8 @@
     <logstash.version>6.2.1</logstash.version>
     <logstash-core-plugin-api.version>2.1.28</logstash-core-plugin-api.version>
     <logstash-dir>${basedir}/logstash-${logstash.version}</logstash-dir>
-    <ruby-gems-dir>${logstash-dir}/vendor/bundle/jruby/2.3.0</ruby-gems-dir>    
+    <ruby-gems-dir>${logstash-dir}/vendor/bundle/jruby/2.3.0</ruby-gems-dir>
+    <local-jars-dir>${basedir}/local_jars</local-jars-dir>    
   </properties>
   
   <profiles>
@@ -75,6 +76,52 @@
 				      </execution>
 				    </executions>
 				</plugin>
+		        <plugin>
+		            <groupId>org.codehaus.gmavenplus</groupId>
+		            <artifactId>gmavenplus-plugin</artifactId>
+		            <version>${gmavenplus-plugin.version}</version>
+		            <executions>
+		                <execution>
+		                    <id>Copy jars</id>
+		                    <phase>validate</phase>
+		                    <goals>
+		                        <goal>execute</goal>
+		                    </goals>
+		                    <configuration>
+		                        <scripts>
+		                            <script>
+		                                <![CDATA[
+		                                  import java.nio.file.*
+		                                  import org.apache.commons.io.FileUtils
+		                                  import org.apache.commons.io.filefilter.*
+		                                  
+		                                  File targetDir = Paths.get(project.properties['local-jars-dir']).toFile()
+		
+		                                  // Copy jars under logstash-core
+		                                  File logstashCoreLibDir = Paths.get(project.properties['logstash-dir'], 'logstash-core/lib/jars').toFile()                              
+		                                  FileUtils.copyDirectory(logstashCoreLibDir, targetDir)
+		                                  
+		                                  // Copy jars from gems folder
+		                                  File logstashCoreGemDir = Paths.get(project.properties['ruby-gems-dir'], 'gems/logstash-core-5.6.4-java/lib').toFile() 
+		                                  
+		                                  for(File file: FileUtils.iterateFiles(logstashCoreGemDir, FileFilterUtils.suffixFileFilter('.jar'), TrueFileFilter.INSTANCE)) {
+		                                    FileUtils.copyFileToDirectory(file, targetDir)
+		                                  } 
+		                                ]]>
+		                            </script>
+		                        </scripts>
+		                    </configuration>
+		                </execution>
+		            </executions>
+		            <dependencies>
+		                <dependency>
+		                  <groupId>org.codehaus.groovy</groupId>
+		                  <artifactId>groovy-all</artifactId>
+		                  <version>${groovy.version}</version>
+		                  <scope>runtime</scope>
+		                </dependency>   
+		            </dependencies>
+		        </plugin>
 			</plugins>
 		</build>
     </profile>
@@ -82,35 +129,34 @@
   
   <build>
     <plugins>
-       <plugin>
-           <groupId>org.codehaus.mojo</groupId>
-           <artifactId>exec-maven-plugin</artifactId>
-           <version>${exec-maven-plugin.version}</version>                
-           <executions>
-             <execution>
-               <id>Execute ES Data Transform Tests</id>  
-               <phase>process-resources</phase>
-               <goals>
-                 <goal>exec</goal>
-               </goals>
-               <configuration>
-                 <skip>false</skip>
-                 <executable>java</executable>
-                 <arguments>
-                   <!-- <argument>-Dlog4j.configurationFile=file:./src/test/resources/es-migration_log4j2.properties</argument> -->
-                   <argument>-cp</argument>
-                   <!-- TODO: Need to use the logstash-core from the gem location. Remove version dependency. If we don't use this version of logstash-core then get error -->
-                   <argument>${ruby-gems-dir}/gems/logstash-core-5.6.4-java/lib/logstash-core/logstash-core.jar;${logstash-dir}/logstash-core/lib/jars/*</argument>
-                   <argument>org.jruby.Main</argument>
-                   <argument>${basedir}/src/test/ruby/core/es_transform_tests.rb</argument>
-                   </arguments>
-                 <environmentVariables>
-                   <GEM_HOME>${ruby-gems-dir}</GEM_HOME>
-                 </environmentVariables>
-               </configuration>
-             </execution>
-           </executions>
-       </plugin>
+		<plugin>
+		    <groupId>org.codehaus.mojo</groupId>
+		    <artifactId>exec-maven-plugin</artifactId>
+		    <version>${exec-maven-plugin.version}</version>                
+		    <executions>
+		      <execution>
+		        <id>Execute ES Data Transform Tests</id>  
+		        <phase>process-resources</phase>
+		        <goals>
+		          <goal>exec</goal>
+		        </goals>
+		        <configuration>
+		          <skip>false</skip>
+		          <executable>java</executable>
+		          <arguments>
+		            <!-- <argument>-Dlog4j.configurationFile=file:./src/test/resources/es-migration_log4j2.properties</argument> -->
+		            <argument>-cp</argument>
+		            <argument>${local-jars-dir}/*</argument>
+		            <argument>org.jruby.Main</argument>
+		            <argument>${basedir}/src/test/ruby/core/es_transform_tests.rb</argument>
+		          </arguments>
+		          <environmentVariables>
+		            <GEM_HOME>${ruby-gems-dir}</GEM_HOME>
+		          </environmentVariables>
+		        </configuration>
+		      </execution>
+		    </executions>
+		</plugin>
     </plugins>    
   </build>    
 </project>
