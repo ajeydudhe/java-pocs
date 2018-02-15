@@ -37,7 +37,9 @@
         <id>Download logstash</id>
         <activation>
             <file>
-                <missing>logstash-${logstash.version}</missing>
+                <missing>logstash-6.2.1</missing>
+                <!-- Profile activation does not support properties -->
+                <!--<missing>logstash-${logstash.version}</missing>-->
             </file>
         </activation>
 		<build>
