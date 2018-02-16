@@ -44,5 +44,10 @@ This is the main script which includes other tests files and dynamically run the
 * The tests class is part of ***EsTransform::Tests*** module.
 * Each test method starts with ***test_*** prefix e.g. test_event_types
 * The test class needs to derive from [***EsTransform::EsTestClassBase***](src/test/ruby/core/es_transform_test_core.rb)
-* Refer to [event_type_tests.rb](src/test/ruby/event_type_tests.rb) on how to implement the test.
- 
+* Refer to [event_type_tests.rb](src/test/ruby/event_type_tests.rb) on how to implement the test and the transformation script [***es_transform.rb***](src/main/ruby/es_transform.rb).
+### Running the tests 
+Since we have used the exec-maven-plugin the tests will now run as part of the maven build using following command:
+```bash
+mvn install
+```
+If there are test failures then the maven build will fail. Only thing missing here is that we won't get an xml or html test execution report but that is not hard to implement.
