@@ -37,7 +37,12 @@ The logstash gem file uses local path for *logstash-core* and *logstash-core-plu
 The jar dependencies needs to be taken care because core classes like logstash event etc. are in the *logstash-core* jar file. Also, we will need other dependencies like fasterxml jars, jruby-complete jar etc. all of these jars are available in logstash deployment folder. For executing the java application we can specify the jar file paths but java does not search for the sub-folders in the path. So the option is to specify each jar file path explicitly or have all of them in a single folder. We went ahead with second option. Refer to plugin with ID as ***Copy jars*** in [pom.xml](pom.xml). Here, we are using groovy script to copy the jar from two locations into ***local_jars*** folder.
 Once the jars are available in ***local_jars*** folder we use following command to execute the ruby script:
 ```java
-java -cp ${basedir}/local_jars org.jruby.Main ${basedir}/src/test/ruby/core/es_transform_tests.rb
+java -cp ${basedir}/local_jars/* org.jruby.Main ${basedir}/src/test/ruby/core/es_transform_tests.rb
 ```
-
+Above will execute the mentioned ruby script i.e. [es_transform_tests.rb](src/test/ruby/core/es_transform_tests.rb).
+This is the main script which includes other tests files and dynamically run them. The script uses following conventions to detect and run the tests:
+* The tests class is part of ***EsTransform::Tests*** module.
+* Each test method starts with ***test_*** prefix e.g. test_event_types
+* The test class needs to derive from [***EsTransform::EsTestClassBase***](src/test/ruby/core/es_transform_test_core.rb)
+* Refer to [event_type_tests.rb](src/test/ruby/event_type_tests.rb) on how to implement the test.
  
